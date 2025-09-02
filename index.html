@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Agente Inmobiliario · Portafolio</title>
+<style>
+  :root{
+    --gap: 1.25rem;
+    --speed: 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --closed: 10rem;
+    --open: 40rem;
+    --accent: #ff6b35;    /* CTA */
+    --blue: #5aa8ff;      /* azul suave */
+    --glass: rgba(255,255,255,.05);
+    --glass-brd: rgba(255,255,255,.12);
+    --txt: #cfd3dc;
+    --txt-dim: #b7bdc9;
+    --white: #fff;
+    --maxw: 1400px;
+    --radius: 16px;
+    --nav-h: 64px;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{scroll-behavior:smooth}
+  body{
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    background:#0a0c10; color:var(--txt);
+    /* menú pegado arriba */
+    padding-top: var(--nav-h);
+  }
+  a{ color:inherit; text-decoration:none }
+  section.page{ padding-inline:12px }
+
+  /* ====== MARCA DE AGUA GLOBAL ====== */
+  .wm{
+    position:fixed; inset:0; z-index:0; pointer-events:none; user-select:none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="360" height="280"><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="28" fill="%23ffffff" opacity="0.045" transform="rotate(-30 180 140)">Alejandra Camacho</text></svg>');
+    background-repeat: repeat;
+    background-size: 360px 280px;
+  }
+  /* eleva el sitio sobre la marca de agua */
+  .site{ position:relative; z-index:1; }
+
+  /* ===== NAVBAR ===== */
+  header.navbar{
+    position: sticky; top: 0; z-index: 1000;
+    display: grid; place-items:center; padding-inline:0px;
+  }
+  .nav-wrap{
+    width:100%; max-width:var(--maxw);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    background: var(--glass);
+    border:1px solid var(--glass-brd);
+    border-radius: 0 0 14px 14px;           /* pegada arriba */
+    box-shadow: 0 6px 20px rgba(0,0,0,.25);
+  }
+  .nav-inner{
+    height: var(--nav-h);
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 0 14px; gap:12px;
+  }
+  .brand{
+    display:flex; align-items:center; gap:.6rem; padding:.35rem .6rem; border-radius: 10px;
+    border:1px solid rgba(255,255,255,.08);
+    transition:.25s;
+  }
+  .brand:hover{ background: rgba(255,255,255,.03) }
+  .brand-dot{
+    width:18px;height:18px;border-radius:50%;
+    background: radial-gradient(35% 35% at 30% 30%, #fff, #bfe0ff 45%, #76b8ff 100%);
+    box-shadow: 0 0 10px rgba(90,168,255,.55);
+  }
+  .brand span{ color:#fff; font-weight:700; letter-spacing:.2px }
+
+  .nav-links{ display:flex; align-items:center; gap:.2rem; padding:.25rem; border-radius: 10px; }
+  .nav-links a{
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:.5rem .8rem; border-radius: 10px; font-weight:600;
+    color:#e9edf5; opacity:.9; transition:.25s; border:1px solid transparent;
+  }
+  .nav-links a:is(:hover,:focus-visible){ opacity:1; background:rgba(255,255,255,.04) }
+  .nav-links a.active{
+    border-color: rgba(90,168,255,.45);
+    box-shadow: 0 0 0 4px rgba(90,168,255,.12) inset;
+  }
+
+  .nav-cta{ display:flex; align-items:center; gap:.5rem }
+  .btn-cta{
+    padding:.55rem 1rem; border:none; border-radius:10px;
+    background: linear-gradient(180deg, #ff6b35, #ff7f57);
+    color:#fff; font-weight:800; cursor:pointer;
+    box-shadow: 0 6px 14px rgba(255,107,53,.28);
+    transition:.25s;
+  }
+  .btn-cta:hover{ transform: translateY(-1px) }
+
+  .nav-toggle{
+    display:none; width:42px;height:42px;border-radius:10px;border:1px solid var(--glass-brd);
+    background: rgba(255,255,255,.06); cursor:pointer; position:relative;
+  }
+  .nav-toggle i, .nav-toggle i::before, .nav-toggle i::after{
+    content:""; position:absolute; left:50%; transform:translateX(-50%);
+    width:18px; height:2px; background:#fff; border-radius:2px; transition:.3s;
+  }
+  .nav-toggle i{ top:50% }
+  .nav-toggle i::before{ top:-6px }
+  .nav-toggle i::after{ top:6px }
+  .nav-toggle.open i{ background: transparent }
+  .nav-toggle.open i::before{ top:0; transform: translateX(-50%) rotate(45deg) }
+  .nav-toggle.open i::after{ top:0; transform: translateX(-50%) rotate(-45deg) }
+
+  /* Drawer móvil (acomodado justo abajo del header) */
+  .drawer{ position: fixed; inset: 0 0 auto 0; top: calc(var(--nav-h) + 8px); display:none; padding: 10px 12px 0 }
+  .drawer-panel{
+    max-width: var(--maxw); margin-inline:auto;
+    background: var(--glass); border:1px solid var(--glass-brd);
+    border-radius: 14px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 10px 30px rgba(0,0,0,.35); overflow:hidden;
+  }
+  .drawer-links{ display:grid; gap:6px; padding:10px }
+  .drawer-links a{
+    padding: 12px 14px; border-radius: 10px; color:#fff; display:flex; justify-content:space-between;
+    background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);
+  }
+  .drawer-links a:hover{ background: rgba(255,255,255,.08) }
+
+  @media (max-width: 980px){
+    .nav-links{ display:none }
+    .nav-toggle{ display:inline-flex; align-items:center; justify-content:center }
+    .nav-cta .btn-cta{ padding:.55rem .9rem }
+  }
+
+  /* ===== HERO ===== */
+  .hero{
+    max-width: var(--maxw); margin: 10px auto 0; padding: 0 12px 8px;
+    display:grid; gap:10px;
+  }
+  .hero h1{ color:#fff; font-weight:800; letter-spacing:.2px; font-size: clamp(1.65rem, 2.4vw, 2.2rem) }
+  .hero p{ color:var(--txt-dim); font-size: clamp(.98rem, 1.2vw, 1.05rem) }
+
+  /* ===== SLIDER ===== */
+  .head{
+    max-width: var(--maxw); margin:auto;
+    padding: 28px 20px 14px;
+    display:flex; justify-content:space-between; align-items:flex-end; gap:2rem;
+  }
+  .head h2{ font: 700 1.25rem/1.2 Inter, sans-serif; color:#fff; letter-spacing:.2px }
+  @media (min-width:1024px){ .head h2{ font-size: 1.5rem } }
+
+  .controls{ display:flex; flex-direction:row; gap:.5rem }
+  .nav-btn{
+    width: 2.4rem; height:2.4rem; border:none; border-radius:10px;
+    background: rgba(255,255,255,.08); color:#fff; font-size:1.35rem;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; transition:.25s;
+  }
+  .nav-btn:hover{ background: rgba(255,255,255,.14) }
+  .nav-btn:disabled{ opacity:.35; cursor:default }
+
+  .slider{ max-width:var(--maxw); margin:auto; overflow:auto; scroll-behavior:smooth; -ms-overflow-style:none; scrollbar-width:none }
+  .slider::-webkit-scrollbar{ display:none }
+  .track{ display:flex; gap:var(--gap); align-items:flex-start; justify-content:center; padding-bottom:24px }
+
+  .project-card{
+    position:relative; flex:0 0 var(--closed); height:26rem; border-radius:14px;
+    overflow:hidden; cursor:pointer; transition:flex-basis var(--speed), transform var(--speed), box-shadow .35s;
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow: 0 6px 18px rgba(0,0,0,.35);
+    background:#0d1117;
+  }
+  .project-card[active]{
+    flex-basis: var(--open);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(0,0,0,.45);
+    border-color: rgba(90,168,255,.35);
+  }
+  .project-card__bg{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+    filter: brightness(.9) saturate(95%); transition: filter .3s, transform var(--speed);
+  }
+  .project-card:hover .project-card__bg{ filter:brightness(.98) saturate(105%); transform: scale(1.05) }
+  .project-card::after{
+    content:""; position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(8,10,14,0) 35%, rgba(8,10,14,.55) 100%);
+    pointer-events:none;
+  }
+
+  .project-card__content{
+    position:absolute; inset:0; display:flex; justify-content:center; align-items:center; z-index:2; padding:0;
+  }
+  .frosted-box{
+    display:flex; flex-direction:column; align-items:center; gap:.6rem; padding:1.2rem 1.4rem;
+    background: rgba(12,16,23,.6); border-radius: 12px;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border:1px solid rgba(255,255,255,.14);
+    color:#fff; text-align:center; position:relative;
+    box-shadow: 0 2px 10px rgba(0,0,0,.25);
+  }
+
+  .badge{
+    position:absolute; top:10px; left:10px; z-index:3;
+    padding:.35rem .65rem; border-radius:999px; font-size:.78rem; font-weight:800; letter-spacing:.4px;
+    color:#fff;
+    border:1px solid rgba(255,255,255,.22);
+    box-shadow:0 6px 16px rgba(0,0,0,.3);
+  }
+  .badge.venta{ background: linear-gradient(180deg, #ff6b35, #ff824f) }
+  .badge.renta{ background: linear-gradient(180deg, #1e90ff, #6ab0ff) }
+  .badge.preventa{ background: linear-gradient(180deg, #0ac581, #31d39b) }
+
+  .project-card__title{ color:#fff; font-weight:800; font-size:1.15rem }
+  .project-card__desc{
+    display:none; color:#e9edf5; font-size:.95rem; line-height:1.4; max-width:22rem; margin:0 auto;
+  }
+  .project-meta{
+    display:none; gap:.5rem; font-size:.9rem; color:#d7dbea; flex-wrap:wrap; justify-content:center;
+  }
+  .chip{ padding:.22rem .5rem; border-radius:999px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14) }
+
+  .project-card[active] .project-card__content{ flex-direction:column; align-items:center; gap:.55rem; padding:1rem 1.1rem }
+  .project-card[active] .project-card__title{ font-size:1.45rem }
+  .project-card[active] .project-card__desc,
+  .project-card[active] .project-meta{ display:flex }
+
+  .project-card__btn{
+    margin-top:.15rem;
+    padding:.5rem 1.05rem; border:none; border-radius:10px; cursor:pointer;
+    background: var(--accent); color:#fff; font-weight:800; font-size:.95rem;
+    box-shadow: 0 6px 14px rgba(255,107,53,.28);
+  }
+  .project-card__btn:hover{ transform: translateY(-1px) }
+
+  .dots{ display:flex; gap:.45rem; justify-content:center; padding:8px 0 24px }
+  .dot{ width:10px; height:10px; border-radius:50%; background: rgba(255,255,255,.28); cursor:pointer; transition:.25s }
+  .dot.active{ background: var(--accent); transform: scale(1.1) }
+
+  @media (max-width: 767px){
+    :root{ --closed: 100%; --open: 100%; --gap: .8rem }
+    .head{ padding: 16px 15px 10px; flex-direction:column; align-items:flex-start; gap:1rem }
+    .slider{ padding-top:6px }
+    .track{ flex-direction:column; gap:.8rem; padding-bottom:10px }
+    .project-card{ height:auto; min-height:80px; flex:0 0 auto; width:100% }
+    .project-card[active]{ min-height:320px; transform:none }
+    .project-card__content{ flex-direction:row; justify-content:center; padding:1rem; align-items:center; gap:1rem }
+    .project-card[active] .project-card__content{ align-items:center; padding:1rem }
+    .project-card__title{ font-size:1.15rem; margin-right:0 }
+    .project-card[active] .project-card__title{ font-size:1.35rem; text-align:center }
+    .project-card[active] .project-card__desc{ font-size:.95rem; max-width:100%; text-align:center }
+    .project-card[active] .project-meta{ flex-wrap:wrap; justify-content:center }
+    .dots{ display:none }
+    .controls{ width:100%; justify-content:space-between; padding: 0 15px 12px }
+    .nav-btn{ width:2.2rem; height:2.2rem; font-size:1.2rem }
+  }
+
+  /* ===== Secciones ===== */
+  .wrap{ max-width: var(--maxw); margin: 0 auto; padding: 28px 12px 36px }
+  .grid{ display:grid; gap:14px }
+  .services{ grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) }
+  .card{
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 14px; padding: 16px 16px 18px;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .card h3{ color:#fff; font-size:1.05rem; margin-bottom:.35rem }
+  .card p{ color:#d7dbea; font-size:.96rem }
+
+  /* Footer */
+  footer{ border-top:1px solid rgba(255,255,255,.08); margin-top:24px }
+  .foot{
+    max-width:var(--maxw); margin:0 auto; padding:16px 12px; color:#bfc6d7; font-size:.92rem;
+    display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center
+  }
+  .credit{ opacity:.9 }
+  .credit b{ color:#fff }
+  .shrink .nav-inner{ height: 56px; transition: height .25s }
+</style>
+</head>
+<body>
+  <!-- Marca de agua -->
+  <div class="wm" aria-hidden="true"></div>
+
+  <div class="site">
+  <!-- ===== NAVBAR ===== -->
+  <header class="navbar" role="navigation" aria-label="Navegación principal">
+    <div class="nav-wrap" id="navWrap">
+      <div class="nav-inner">
+        <a href="#inicio" class="brand" aria-label="Inicio">
+          <span class="brand-dot" aria-hidden="true"></span>
+          <span>TuAgente Inmobiliario</span>
+        </a>
+
+        <nav class="nav-links" aria-label="Secciones">
+          <a href="#inicio" class="active">Inicio</a>
+          <a href="#propiedades">Propiedades</a>
+          <a href="#servicios">Servicios</a>
+          <a href="#sobre-mi">Sobre mí</a>
+          <a href="#contacto">Contacto</a>
+        </nav>
+
+        <div class="nav-cta">
+          <button class="btn-cta" onclick="document.querySelector('#contacto')?.scrollIntoView({behavior:'smooth'})">
+            Agenda tu cita
+          </button>
+          <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
+            <i></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Drawer móvil -->
+    <div class="drawer" id="drawer" aria-hidden="true">
+      <div class="drawer-panel">
+        <div class="drawer-links">
+          <a href="#inicio">Inicio <span>⌂</span></a>
+          <a href="#propiedades">Propiedades <span>⟶</span></a>
+          <a href="#servicios">Servicios <span>⟶</span></a>
+          <a href="#sobre-mi">Sobre mí <span>⟶</span></a>
+          <a href="#contacto">Contacto <span>⟶</span></a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section id="inicio" class="hero">
+    <h1>Encuentra la propiedad ideal en Querétaro</h1>
+    <p>Te acompaño en todo el proceso: valuación, crédito, negociación y cierre. Zonas: Juriquilla, Centro Sur, El Refugio y Zibatá.</p>
+  </section>
+
+  <!-- ===== SLIDER PROPIEDADES DESTACADAS ===== -->
+  <section class="page" aria-label="Propiedades destacadas">
+    <div class="head">
+      <h2>Propiedades destacadas</h2>
+      <div class="controls">
+        <button id="prev" class="nav-btn" aria-label="Anterior">‹</button>
+        <button id="next" class="nav-btn" aria-label="Siguiente">›</button>
+      </div>
+    </div>
+
+    <div class="slider">
+      <div class="track" id="track">
+
+        <!-- VENTA -->
+        <article class="project-card" data-id="QRO-001" data-status="VENTA" active>
+          <span class="badge venta">VENTA</span>
+          <img class="project-card__bg" src="https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80&w=1600&auto=format&fit=crop" alt="Casa moderna en Juriquilla, Querétaro">
+          <div class="project-card__content">
+            <div class="frosted-box">
+              <div>
+                <h3 class="project-card__title">Casa moderna · Juriquilla</h3>
+                <div class="project-meta" style="margin:.2rem 0 .3rem">
+                  <span class="chip">3 rec</span>
+                  <span class="chip">2.5 baños</span>
+                  <span class="chip">2 autos</span>
+                </div>
+                <p class="project-card__desc">Jardín, roof garden y seguridad 24/7. Cerca de Antea. <br><b>$7,450,000 MXN</b></p>
+                <button class="project-card__btn" onclick="whats('QRO-001')">Quiero más info</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- RENTA -->
+        <article class="project-card" data-id="QRO-002" data-status="RENTA">
+          <span class="badge renta">RENTA</span>
+          <img class="project-card__bg" src="https://images.unsplash.com/photo-1560448075-bb4caa6c0f11?q=80&w=1600&auto=format&fit=crop" alt="Residencia en privada en Centro Sur, Querétaro">
+          <div class="project-card__content">
+            <div class="frosted-box">
+              <div>
+                <h3 class="project-card__title">Residencia en privada · Centro Sur</h3>
+                <div class="project-meta">
+                  <span class="chip">3 rec</span>
+                  <span class="chip">2 baños</span>
+                  <span class="chip">Pet friendly</span>
+                </div>
+                <p class="project-card__desc">Áreas comunes con alberca, terraza y juegos. <br><b>$28,000 MXN/mes</b></p>
+                <button class="project-card__btn" onclick="whats('QRO-002')">Agendar visita</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- VENTA -->
+        <article class="project-card" data-id="QRO-003" data-status="VENTA">
+          <span class="badge venta">VENTA</span>
+          <img class="project-card__bg" src="https://images.unsplash.com/photo-1572120360610-d971b9d7767c?q=80&w=1600&auto=format&fit=crop" alt="Casa minimalista con jardín en Zibatá, Querétaro">
+          <div class="project-card__content">
+            <div class="frosted-box">
+              <div>
+                <h3 class="project-card__title">Minimalista · Zibatá</h3>
+                <div class="project-meta">
+                  <span class="chip">4 rec</span>
+                  <span class="chip">3 baños</span>
+                  <span class="chip">Terreno 300 m²</span>
+                </div>
+                <p class="project-card__desc">Iluminación natural, espacios abiertos y acabados premium. <br><b>$9,950,000 MXN</b></p>
+                <button class="project-card__btn" onclick="whats('QRO-003')">Quiero más info</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- RENTA -->
+        <article class="project-card" data-id="QRO-004" data-status="RENTA">
+          <span class="badge renta">RENTA</span>
+          <img class="project-card__bg" src="https://images.unsplash.com/photo-1598928506311-9c5a2d8a6a30?q=80&w=1600&auto=format&fit=crop" alt="Departamento con vista a la ciudad en Centro Sur, Querétaro">
+          <div class="project-card__content">
+            <div class="frosted-box">
+              <div>
+                <h3 class="project-card__title">Departamento vista a la ciudad · Centro Sur</h3>
+                <div class="project-meta">
+                  <span class="chip">2 rec</span>
+                  <span class="chip">2 baños</span>
+                  <span class="chip">Amenidades</span>
+                </div>
+                <p class="project-card__desc">Gym, alberca y seguridad 24/7. <br><b>$42,000 MXN/mes</b></p>
+                <button class="project-card__btn" onclick="whats('QRO-004')">Agendar visita</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- PREVENTA -->
+        <article class="project-card" data-id="QRO-005" data-status="PREVENTA">
+          <span class="badge preventa">PREVENTA</span>
+          <img class="project-card__bg" src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1600&auto=format&fit=crop" alt="Desarrollo en preventa con amenidades en El Refugio, Querétaro">
+          <div class="project-card__content">
+            <div class="frosted-box">
+              <div>
+                <h3 class="project-card__title">Desarrollo con amenidades · El Refugio</h3>
+                <div class="project-meta">
+                  <span class="chip">1–3 rec</span>
+                  <span class="chip">Cowork + Sky bar</span>
+                  <span class="chip">Financiamiento</span>
+                </div>
+                <p class="project-card__desc">Inversión desde <b>$2,450,000 MXN</b>. Entrega 2026.</p>
+                <button class="project-card__btn" onclick="whats('QRO-005')">Lista de precios</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- VENTA -->
+        <article class="project-card" data-id="QRO-006" data-status="VENTA">
+          <span class="badge venta">VENTA</span>
+          <img class="project-card__bg" src="https://images.unsplash.com/photo-1501183638710-841dd1904471?q=80&w=1600&auto=format&fit=crop" alt="Casa contemporánea con terraza en Juriquilla, Querétaro">
+          <div class="project-card__content">
+            <div class="frosted-box">
+              <div>
+                <h3 class="project-card__title">Contemporánea · Terraza · Juriquilla</h3>
+                <div class="project-meta">
+                  <span class="chip">3 rec</span>
+                  <span class="chip">2.5 baños</span>
+                  <span class="chip">Terraza + BBQ</span>
+                </div>
+                <p class="project-card__desc">Cerca de escuelas y centros comerciales. <br><b>$6,300,000 MXN</b></p>
+                <button class="project-card__btn" onclick="whats('QRO-006')">Quiero más info</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+
+    <div class="dots" id="dots" aria-label="Navegación por páginas"></div>
+  </section>
+
+  <!-- ===== Sección Propiedades (ancla) ===== -->
+  <section id="propiedades" class="wrap">
+    <div class="grid services">
+      <div class="card">
+        <h3>Compra</h3>
+        <p>Búsqueda personalizada, análisis de mercado y negociación para conseguir el mejor precio.</p>
+      </div>
+      <div class="card">
+        <h3>Venta</h3>
+        <p>Valuación profesional, fotos, video, open house y estrategia digital para vender más rápido.</p>
+      </div>
+      <div class="card">
+        <h3>Renta</h3>
+        <p>Filtrado de inquilinos, contrato, verificación y administración de la propiedad.</p>
+      </div>
+      <div class="card">
+        <h3>Crédito & Asesoría</h3>
+        <p>Te apoyo con precalificación, simulaciones y opciones de financiamiento.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Sobre mí / Testimonios / Contacto ===== -->
+  <section id="sobre-mi" class="wrap">
+    <div class="card">
+      <h3>Sobre mí</h3>
+      <p>Agente certificado con enfoque en Santiago de Querétaro y zona metropolitana. Transparencia, acompañamiento y resultados.</p>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="card">
+      <h3 style="margin-bottom:.4rem;color:#fff">Testimonios</h3>
+      <p>“Vendimos en 21 días y a precio récord”. — Familia C.</p>
+    </div>
+  </section>
+
+  <section id="contacto" class="wrap">
+    <div class="card">
+      <h3 style="margin-bottom:.4rem;color:#fff">Contacto</h3>
+      <p>Escríbeme por WhatsApp o agenda una llamada. Respondo el mismo día.</p>
+      <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap">
+        <button class="btn-cta" onclick="whats()">WhatsApp</button>
+        <a class="btn-cta" style="display:inline-flex; align-items:center" href="tel:+523310000000">Llamar</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="foot">
+      <span>© <script>document.write(new Date().getFullYear())</script> TuAgente Inmobiliario</span>
+      <span>Querétaro, Qro.</span>
+      <span class="credit" aria-label="Crédito del sitio">Desarrollado por <b>Alejandra Camacho</b></span>
+    </div>
+  </footer>
+  </div><!-- /site -->
+
+<script>
+/* ===== Config WhatsApp ===== */
+const WA_NUMBER = "523310000000"; // <-- Reemplaza por tu número con lada (52MX)
+function whats(id){
+  const text = id ? `Hola, me interesa la propiedad ${id} en Querétaro. ¿Podemos agendar una visita?` :
+                    "Hola, quiero una asesoría para compra/venta/renta en Querétaro.";
+  const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`;
+  window.open(url, "_blank");
+}
+
+/* ===== SLIDER JS ===== */
+(() => {
+  const track = document.getElementById("track");
+  const wrap = track.parentElement;
+  const cards = Array.from(track.children);
+  const prev = document.getElementById("prev");
+  const next = document.getElementById("next");
+  const dotsBox = document.getElementById("dots");
+  const isMobile = () => matchMedia("(max-width:767px)").matches;
+
+  // Dots
+  cards.forEach((_, i) => {
+    const dot = document.createElement("span");
+    dot.className = "dot";
+    dot.setAttribute("aria-label", "Ir a la tarjeta " + (i + 1));
+    dot.onclick = () => activate(i, true);
+    dotsBox.appendChild(dot);
+  });
+  const dots = Array.from(dotsBox.children);
+
+  let current = 0;
+
+  function center(i) {
+    const card = cards[i];
+    const axis = isMobile() ? "top" : "left";
+    const size = isMobile() ? "clientHeight" : "clientWidth";
+    const start = isMobile() ? card.offsetTop : card.offsetLeft;
+    wrap.scrollTo({
+      [axis]: start - (wrap[size] / 2 - card[size] / 2),
+      behavior: "smooth"
+    });
+  }
+
+  function toggleUI(i) {
+    cards.forEach((c, k) => c.toggleAttribute("active", k === i));
+    dots.forEach((d, k) => d.classList.toggle("active", k === i));
+    prev.disabled = i === 0;
+    next.disabled = i === cards.length - 1;
+  }
+
+  function activate(i, scroll) {
+    if (i === current) return;
+    current = i;
+    toggleUI(i);
+    if (scroll) center(i);
+  }
+
+  function go(step) {
+    activate(Math.min(Math.max(current + step, 0), cards.length - 1), true);
+  }
+
+  prev.onclick = () => go(-1);
+  next.onclick = () => go(1);
+
+  addEventListener("keydown", (e) => {
+    if (["ArrowRight", "ArrowDown"].includes(e.key)) go(1);
+    if (["ArrowLeft", "ArrowUp"].includes(e.key)) go(-1);
+  }, { passive: true });
+
+  cards.forEach((card, i) => {
+    card.addEventListener("mouseenter", () => matchMedia("(hover:hover)").matches && activate(i, true), { passive: true });
+    card.addEventListener("click", () => activate(i, true), { passive: true });
+  });
+
+  // Swipe
+  let sx = 0, sy = 0;
+  track.addEventListener("touchstart", (e) => {
+    sx = e.touches[0].clientX;
+    sy = e.touches[0].clientY;
+  }, { passive: true });
+
+  track.addEventListener("touchend", (e) => {
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    if (isMobile() ? Math.abs(dy) > 60 : Math.abs(dx) > 60)
+      go((isMobile() ? dy : dx) > 0 ? -1 : 1);
+  }, { passive: true });
+
+  if (window.matchMedia("(max-width:767px)").matches) dotsBox.hidden = true;
+
+  addEventListener("resize", () => center(current));
+
+  toggleUI(0);
+  center(0);
+})();
+
+/* ===== NAVBAR JS ===== */
+(() => {
+  const navToggle = document.getElementById('navToggle');
+  const drawer = document.getElementById('drawer');
+
+  function openDrawer(open){
+    drawer.style.display = open ? 'block' : 'none';
+    drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
+    navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    navToggle.classList.toggle('open', open);
+  }
+
+  let isOpen = false;
+  navToggle?.addEventListener('click', () => { isOpen = !isOpen; openDrawer(isOpen); });
+
+  drawer.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if(link){ isOpen = false; openDrawer(false); }
+  }, { passive:true });
+
+  document.addEventListener('click', (e) => {
+    if(!isOpen) return;
+    if(!drawer.contains(e.target) && !navToggle.contains(e.target)){
+      isOpen = false; openDrawer(false);
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && isOpen){ isOpen = false; openDrawer(false); }
+  });
+
+  const onScroll = () => {
+    const y = window.scrollY;
+    if(y > 30) document.documentElement.classList.add('shrink');
+    else document.documentElement.classList.remove('shrink');
+  };
+  document.addEventListener('scroll', onScroll, { passive:true });
+  onScroll();
+
+  const links = document.querySelectorAll('.nav-links a');
+  links.forEach(a=>{
+    a.addEventListener('click', ()=>{
+      links.forEach(x=>x.classList.remove('active'));
+      a.classList.add('active');
+    });
+  });
+})();
+</script>
+</body>
+</html>
