@@ -10,8 +10,8 @@
     --speed: 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     --closed: 10rem;
     --open: 40rem;
-    --accent: #ff6b35;    /* CTA */
-    --blue: #5aa8ff;      /* azul suave */
+    --accent: #ff6b35;
+    --blue: #5aa8ff;
     --glass: rgba(255,255,255,.05);
     --glass-brd: rgba(255,255,255,.12);
     --txt: #cfd3dc;
@@ -24,36 +24,38 @@
 
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{scroll-behavior:smooth}
+
+  /* ====== Marca de agua global ====== */
+  .wm{
+    position:fixed; inset:0; z-index:0; pointer-events:none; user-select:none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="360" height="280"><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="28" fill="%23ffffff" opacity="0.045" transform="rotate(-30 180 140)">Alejandra Camacho</text></svg>');
+    background-repeat: repeat; background-size: 360px 280px;
+  }
+  .site{ position:relative; z-index:1; }
+
   body{
     font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
     background:#0a0c10; color:var(--txt);
-    /* menú pegado arriba */
-    padding-top: var(--nav-h);
+    /* Compensamos la barra fija + notch en móviles */
+    padding-top: calc(var(--nav-h) + env(safe-area-inset-top));
   }
   a{ color:inherit; text-decoration:none }
   section.page{ padding-inline:12px }
 
-  /* ====== MARCA DE AGUA GLOBAL ====== */
-  .wm{
-    position:fixed; inset:0; z-index:0; pointer-events:none; user-select:none;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="360" height="280"><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="28" fill="%23ffffff" opacity="0.045" transform="rotate(-30 180 140)">Alejandra Camacho</text></svg>');
-    background-repeat: repeat;
-    background-size: 360px 280px;
-  }
-  /* eleva el sitio sobre la marca de agua */
-  .site{ position:relative; z-index:1; }
-
-  /* ===== NAVBAR ===== */
+  /* ===== NAVBAR SIEMPRE ARRIBA ===== */
   header.navbar{
-    position: sticky; top: 0; z-index: 1000;
-    display: grid; place-items:center; padding-inline:0px;
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 9999;
+    display: grid; place-items:center;
+    padding: env(safe-area-inset-top) 12px 0 12px; /* respeta notch */
+    background: transparent; /* el glass está en .nav-wrap */
   }
   .nav-wrap{
     width:100%; max-width:var(--maxw);
     backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
     background: var(--glass);
     border:1px solid var(--glass-brd);
-    border-radius: 0 0 14px 14px;           /* pegada arriba */
+    border-radius: 0 0 14px 14px;         /* pegada al borde superior */
     box-shadow: 0 6px 20px rgba(0,0,0,.25);
   }
   .nav-inner{
@@ -111,8 +113,8 @@
   .nav-toggle.open i::before{ top:0; transform: translateX(-50%) rotate(45deg) }
   .nav-toggle.open i::after{ top:0; transform: translateX(-50%) rotate(-45deg) }
 
-  /* Drawer móvil (acomodado justo abajo del header) */
-  .drawer{ position: fixed; inset: 0 0 auto 0; top: calc(var(--nav-h) + 8px); display:none; padding: 10px 12px 0 }
+  /* Drawer móvil – justo debajo del header fijo */
+  .drawer{ position: fixed; inset: 0 0 auto 0; top: calc(var(--nav-h) + env(safe-area-inset-top)); display:none; padding: 10px 12px 0 }
   .drawer-panel{
     max-width: var(--maxw); margin-inline:auto;
     background: var(--glass); border:1px solid var(--glass-brd);
